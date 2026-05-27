@@ -51,99 +51,197 @@ export default function CharacterPage() {
   }
 
   if (!character) {
-    return <p>Loading...</p>;
+    return <p style={{ color: "#000" }}>Loading...</p>;
+  }
+
+  function renderTrack(label, current, max, statName) {
+    return (
+      <div style={{ marginBottom: "18px" }}>
+        <strong
+          style={{
+            display: "block",
+            marginBottom: "6px",
+            color: "#000"
+          }}
+        >
+          {label}
+        </strong>
+
+        <div
+          style={{
+            display: "flex",
+            gap: "6px",
+            flexWrap: "wrap"
+          }}
+        >
+          {[...Array(max)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                const newValue =
+                  index < current
+                    ? index
+                    : index + 1;
+
+                updateStat(statName, newValue);
+              }}
+              style={{
+                width: "28px",
+                height: "28px",
+                border: "1px solid #000",
+                borderRadius: "0px",
+                background:
+                  index < current
+                    ? "#000"
+                    : "#fff",
+                color:
+                  index < current
+                    ? "#fff"
+                    : "#000",
+                cursor: "pointer",
+                fontWeight: "bold"
+              }}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <Link to="/">Back</Link>
+    <div
+      style={{
+        padding: "24px",
+        fontFamily: "Arial",
+        color: "#000"
+      }}
+    >
+      <Link
+        to="/"
+        style={{
+          display: "inline-block",
+          marginBottom: "20px",
+          color: "#000",
+          textDecoration: "none",
+          border: "1px solid #000",
+          padding: "4px 8px"
+        }}
+      >
+        Back
+      </Link>
 
-      <h1>{character.Name}</h1>
+      <div
+        style={{
+          border: "1px solid #000",
+          borderRadius: "4px",
+          padding: "18px",
+          background: "#fff"
+        }}
+      >
+        <h1
+          style={{
+            marginTop: 0,
+            marginBottom: "6px",
+            color:"black"
+          }}
+        >
+          {character.Name}
+        </h1>
 
-      <p>
-        The {character.Species} {character.Class}
-      </p>
-      <h2>Charm {character.Charm}</h2>
-      <h2>Cunning {character.Cunning}</h2>
-      <h2>Finesse {character.Finesse}</h2>
-      <h2>Luck {character.Luck}</h2>
-      <h2>Might {character.Might}</h2>
+        <p style={{ marginTop: 0 ,color:"black"}}>
+          The {character.Species} {character.Class}
+        </p>
 
-      {/* Injury */}
-      <div>
-        <strong>Injury</strong>
-
-        {[...Array(character.MAX_I)].map((_, index) => (
-          <label key={index}>
-            <input
-              type="checkbox"
-              checked={index < character.Injury}
-              onChange={() => {
-                const newValue =
-                  index < character.Injury
-                    ? index
-                    : index + 1;
-
-                updateStat("Injury", newValue);
+        {/* STATS */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            gap: "10px",
+            marginTop: "20px",
+            marginBottom: "24px"
+          }}
+        >
+          {[
+            ["Charm", character.Charm],
+            ["Cunning", character.Cunning],
+            ["Finesse", character.Finesse],
+            ["Luck", character.Luck],
+            ["Might", character.Might]
+          ].map(([name, value]) => (
+            <div
+              key={name}
+              style={{
+                border: "1px solid #000",
+                padding: "10px",
+                textAlign: "center"
               }}
-            />
-          </label>
-        ))}
+            >
+              <div
+                style={{
+                  fontSize: "12px",
+                  marginBottom: "4px"
+                }}
+              >
+                {name}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "bold"
+                }}
+              >
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* TRACKS */}
+        {renderTrack(
+          "Injury",
+          character.Injury,
+          character.MAX_I,
+          "Injury"
+        )}
+
+        {renderTrack(
+          "Exhaustion",
+          character.Exhaustion,
+          character.MAX_E,
+          "Exhaustion"
+        )}
+
+        {renderTrack(
+          "Depletion",
+          character.Depletion,
+          character.MAX_D,
+          "Depletion"
+        )}
+
+        {/* LINKS */}
+        <div style={{ marginTop: "24px" }}>
+          <Link
+            to="reputation"
+            style={{
+              color: "#000",
+              textDecoration: "none",
+              border: "1px solid #000",
+              padding: "6px 10px",
+              display: "inline-block"
+            }}
+          >
+            Reputation
+          </Link>
+        </div>
       </div>
 
-      <br />
-
-      {/* Exhaustion */}
-      <div>
-        <strong>Exhaustion</strong>
-
-        {[...Array(character.MAX_E)].map((_, index) => (
-          <label key={index}>
-            <input
-              type="checkbox"
-              checked={index < character.Exhaustion}
-              onChange={() => {
-                const newValue =
-                  index < character.Exhaustion
-                    ? index
-                    : index + 1;
-
-                updateStat("Exhaustion", newValue);
-              }}
-            />
-          </label>
-        ))}
+      <div style={{ marginTop: "20px" }}>
+        <Outlet />
       </div>
-
-      <br />
-
-      {/* Depletion */}
-      <div>
-        <strong>Depletion</strong>
-
-        {[...Array(character.MAX_D)].map((_, index) => (
-          <label key={index}>
-            <input
-              type="checkbox"
-              checked={index < character.Depletion}
-              onChange={() => {
-                const newValue =
-                  index < character.Depletion
-                    ? index
-                    : index + 1;
-
-                updateStat("Depletion", newValue);
-              }}
-            />
-          </label>
-        ))}
-      </div>
-
-      <br />
-
-      <Link to="reputation">Reputation</Link>
-
-      <Outlet />
     </div>
   );
 }
