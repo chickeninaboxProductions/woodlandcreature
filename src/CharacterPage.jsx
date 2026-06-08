@@ -19,7 +19,8 @@ export default function CharacterPage() {
     textAlign: "left",
     fontWeight: "bold",
     color: "#000",
-    border: "solid black 1px"
+    border: "solid black 1px",
+    padding: "3px"
   };
 
   useEffect(() => {
