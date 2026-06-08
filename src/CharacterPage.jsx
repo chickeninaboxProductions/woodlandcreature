@@ -18,7 +18,8 @@ export default function CharacterPage() {
   const headerStyle = {
     textAlign: "left",
     fontWeight: "bold",
-    color: "#000"
+    color: "#000",
+    border: "solid black 1px"
   };
 
   useEffect(() => {
@@ -284,11 +285,11 @@ export default function CharacterPage() {
               <tbody>
                 {equipment.map((equip) => (
                   <tr key={equip.id}>
-                    <td>{equip.Item?.name}</td>
-                    <td>{equip.Item?.Type}</td>
-                    <td>{equip.Item?.Load}</td>
-                    <td>{equip.Item?.DefaultValue}</td>
-                    <td>{equip.Notes}</td>
+                    <td style={headerStyle}>{equip.Item?.name}</td>
+                    <td style={headerStyle}>{equip.Item?.Type}</td>
+                    <td style={headerStyle}>{equip.Item?.Load}</td>
+                    <td style={headerStyle}>{equip.Item?.DefaultValue}</td>
+                    <td style={headerStyle}>{equip.Notes}</td>
                   </tr>
                 ))}
               </tbody>
@@ -303,7 +304,7 @@ export default function CharacterPage() {
           {charmoves.length === 0 ? (
             <p>No moves.</p>
           ) : (
-             <table
+            <table
               style={{
                 width: "100%",
                 borderCollapse: "collapse"
@@ -321,9 +322,9 @@ export default function CharacterPage() {
               <tbody>
                 {charmoves.map((move) => (
                   <tr key={move.id}>
-                    <td>{move.Move?.Name}</td>
-                    <td>{move.Move?.Description}</td>
-                    <td>{move.Move?.Roll}</td>
+                    <td style={headerStyle}>{move.Move?.Name}</td>
+                    <td style={headerStyle}>{move.Move?.Description}</td>
+                    <td style={headerStyle}>{move.Move?.Roll}</td>
                   </tr>
                 ))}
               </tbody>
