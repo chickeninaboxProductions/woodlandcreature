@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link, Outlet } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
@@ -11,6 +12,14 @@ export default function CharacterPage() {
   const { id } = useParams();
 
   const [character, setCharacter] = useState(null);
+  const [equipment, setEquipment] = useState([]);
+  const [charmoves, setCharMoves] = useState([]);
+
+  const headerStyle = {
+    textAlign: "left",
+    fontWeight: "bold",
+    color: "#000"
+  };
 
   useEffect(() => {
     getCharacter();
@@ -29,6 +38,48 @@ export default function CharacterPage() {
     }
 
     setCharacter(data);
+
+    const { data: equipmentData, error: equipmentError } = await supabase
+      .from("Equipement")
+      .select(`
+        id,
+        Notes,
+        Item (
+          id,
+          name,
+          Type,
+          Load,
+          Range,
+          Harm,
+          DefaultValue
+        )
+      `)
+      .eq("Character", id);
+
+    if (equipmentError) {
+      console.error(equipmentError);
+    } else {
+      setEquipment(equipmentData || []);
+    }
+
+    const { data: charmovesData, error: charmovesError } = await supabase
+  .from("CharacterMoves")
+  .select(`
+    id,
+    Move (
+      id,
+      Name,
+      Description,
+      Roll
+    )
+  `)
+  .eq("Character", id);
+
+    if (charmovesError) {
+      console.error(charmovesError);
+    } else {
+      setCharMoves(charmovesData || []);
+    }
   }
 
   async function updateStat(statName, value) {
@@ -48,10 +99,6 @@ export default function CharacterPage() {
       ...prev,
       [statName]: value,
     }));
-  }
-
-  if (!character) {
-    return <p style={{ color: "#000" }}>Loading...</p>;
   }
 
   function renderTrack(label, current, max, statName) {
@@ -89,7 +136,6 @@ export default function CharacterPage() {
                 width: "28px",
                 height: "28px",
                 border: "1px solid #000",
-                borderRadius: "0px",
                 background:
                   index < current
                     ? "#000"
@@ -108,6 +154,10 @@ export default function CharacterPage() {
         </div>
       </div>
     );
+  }
+
+  if (!character) {
+    return <p style={{ color: "#000" }}>Loading...</p>;
   }
 
   return (
@@ -140,21 +190,15 @@ export default function CharacterPage() {
           background: "#fff"
         }}
       >
-        <h1
-          style={{
-            marginTop: 0,
-            marginBottom: "6px",
-            color:"black"
-          }}
-        >
+        <h1 style={{ marginTop: 0, color: "#000" }}>
           {character.Name}
         </h1>
 
-        <p style={{ marginTop: 0 ,color:"black"}}>
+        <p style={{ color: "#000" }}>
           The {character.Species} {character.Class}
         </p>
 
-        {/* STATS */}
+        {/* Stats */}
         <div
           style={{
             display: "grid",
@@ -179,15 +223,7 @@ export default function CharacterPage() {
                 textAlign: "center"
               }}
             >
-              <div
-                style={{
-                  fontSize: "12px",
-                  marginBottom: "4px"
-                }}
-              >
-                {name}
-              </div>
-
+              <div>{name}</div>
               <div
                 style={{
                   fontSize: "22px",
@@ -200,7 +236,7 @@ export default function CharacterPage() {
           ))}
         </div>
 
-        {/* TRACKS */}
+        {/* Tracks */}
         {renderTrack(
           "Injury",
           character.Injury,
@@ -222,18 +258,81 @@ export default function CharacterPage() {
           "Depletion"
         )}
 
-        {/* LINKS */}
+        {/* Equipment */}
         <div style={{ marginTop: "24px" }}>
-          <Link
-            to="reputation"
-            style={{
-              color: "#000",
-              textDecoration: "none",
-              border: "1px solid #000",
-              padding: "6px 10px",
-              display: "inline-block"
-            }}
-          >
+          <h2 style={{ color: "#000" }}>Equipment</h2>
+
+          {equipment.length === 0 ? (
+            <p>No equipment equipped.</p>
+          ) : (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse"
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={headerStyle}>Name</th>
+                  <th style={headerStyle}>Type</th>
+                  <th style={headerStyle}>Load</th>
+                  <th style={headerStyle}>Value</th>
+                  <th style={headerStyle}>Notes</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {equipment.map((equip) => (
+                  <tr key={equip.id}>
+                    <td>{equip.Item?.name}</td>
+                    <td>{equip.Item?.Type}</td>
+                    <td>{equip.Item?.Load}</td>
+                    <td>{equip.Item?.DefaultValue}</td>
+                    <td>{equip.Notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Moves */}
+        <div style={{ marginTop: "24px" }}>
+          <h2 style={{ color: "#000" }}>Moves</h2>
+
+          {charmoves.length === 0 ? (
+            <p>No moves.</p>
+          ) : (
+             <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse"
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={headerStyle}>Name</th>
+                  <th style={headerStyle}>Description</th>
+                  <th style={headerStyle}>Roll</th>
+
+                </tr>
+              </thead>
+
+              <tbody>
+                {charmoves.map((move) => (
+                  <tr key={move.id}>
+                    <td>{move.Move?.Name}</td>
+                    <td>{move.Move?.Description}</td>
+                    <td>{move.Move?.Roll}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div style={{ marginTop: "24px" }}>
+          <Link to="reputation">
             Reputation
           </Link>
         </div>
