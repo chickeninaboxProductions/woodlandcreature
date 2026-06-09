@@ -10,7 +10,8 @@ const supabase = createClient(
 
 export default function CharacterPage() {
   const { id } = useParams();
-
+  const [moneyAmount, setMoneyAmount] = useState(1);
+  const [subtractMoney, setSubtractMoney] = useState(false);
   const [character, setCharacter] = useState(null);
   const [equipment, setEquipment] = useState([]);
   const [charmoves, setCharMoves] = useState([]);
@@ -83,7 +84,30 @@ export default function CharacterPage() {
       setCharMoves(charmovesData || []);
     }
   }
+  async function changeMoney() {
+  const currentMoney = character.Money || 0;
 
+  const newMoney = subtractMoney
+    ? Math.max(0, currentMoney - moneyAmount)
+    : currentMoney + moneyAmount;
+
+  const { error } = await supabase
+    .from("Character")
+    .update({
+      Money: newMoney,
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setCharacter((prev) => ({
+    ...prev,
+    Money: newMoney,
+  }));
+}
   async function updateStat(statName, value) {
     const { error } = await supabase
       .from("Character")
@@ -237,7 +261,61 @@ export default function CharacterPage() {
             </div>
           ))}
         </div>
+          {/* Money */}
+<div
+  style={{
+    marginTop: "24px",
+    marginBottom: "24px",
+    border: "1px solid #000",
+    padding: "16px"
+  }}
+>
+  <h2 style={{ marginTop: 0 , color: "black"}}>Value</h2>
 
+  <div
+    style={{
+      fontSize: "28px",
+      fontWeight: "bold",
+      marginBottom: "12px"
+    }}
+  >
+    {character.Money || 0}
+  </div>
+
+  <div
+    style={{
+      display: "flex",
+      gap: "10px",
+      alignItems: "center",
+      flexWrap: "wrap"
+    }}
+  >
+    <input
+      type="number"
+      min="0"
+      value={moneyAmount}
+      onChange={(e) =>
+        setMoneyAmount(Number(e.target.value) || 1)
+      }
+      style={{ width: "80px" }}
+    />
+
+    <label>
+      <input
+        type="checkbox"
+        checked={subtractMoney}
+        onChange={(e) =>
+          setSubtractMoney(e.target.checked)
+        }
+      />
+      {" "}Subtract
+    </label>
+
+    <button onClick={changeMoney}>
+      {subtractMoney ? "-" : "+"}
+    </button>
+  </div>
+</div>
         {/* Tracks */}
         {renderTrack(
           "Injury",
