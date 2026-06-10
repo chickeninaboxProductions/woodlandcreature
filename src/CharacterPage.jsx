@@ -148,7 +148,20 @@ export default function CharacterPage() {
   return (
     <div className="character-sheet">
       <div className="sheet-container">
-        <Link to="/">← Back</Link>
+        <Link
+        to={`/character/${characterId}`}
+        style={{
+          display: "inline-block",
+          marginBottom: "20px",
+          color: "#000",
+          textDecoration: "none",
+          border: "1px solid #000",
+          padding: "4px 8px",
+          background: "#fff"
+        }}
+      >
+        ← Back
+      </Link>
 
         <div className="sheet-header">
           <h1 className="sheet-title">

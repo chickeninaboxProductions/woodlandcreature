@@ -14,7 +14,7 @@ export default function MoveList() {
 
 
         <iframe
-          src="/PDFs/Moves.pdf"
+          src="https://woodlandcreature-olrp.vercel.app/PDFs/Moves.pdf"
           title="PDF Viewer"
           width="100%"
           height="650px"
