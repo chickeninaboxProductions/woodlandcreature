@@ -14,7 +14,7 @@ export default function MoveList() {
 
 
         <iframe
-          src="public\PDFs\Moves.pdf"
+          src="/PDFs/Moves.pdf"
           title="PDF Viewer"
           width="100%"
           height="650px"
