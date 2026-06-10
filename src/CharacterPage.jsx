@@ -149,7 +149,7 @@ export default function CharacterPage() {
     <div className="character-sheet">
       <div className="sheet-container">
         <Link
-        to={`/character/${characterId}`}
+        to={`/`}
         style={{
           display: "inline-block",
           marginBottom: "20px",
