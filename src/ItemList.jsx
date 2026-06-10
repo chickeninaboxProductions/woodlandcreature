@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-
+import "./Root.css";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -110,8 +110,10 @@ const filteredItems = [...items]
     }
   });
   return (
-    <div style={{ padding: "24px", fontFamily: "Arial", color: "#000" }}>
-      <div style={{ marginBottom: "12px" }}>
+    <div className="character-sheet">
+            <h1 className="sheet-title" style={{ marginBottom: "10px",marginTop: "-10px" }}>Items</h1>
+      <div className="panel">
+        
         
   <strong>Type:</strong>{" "}
 
@@ -125,13 +127,8 @@ const filteredItems = [...items]
       </option>
     ))}
   </select>
-</div>
-<div style={{ marginBottom: "12px" }}>
-  <strong>Max Cost:</strong> {maxCost}
-
   <br />
-  
-
+    <strong>Max Cost:</strong> {maxCost}
   <input
     type="range"
     min="0"
@@ -142,8 +139,7 @@ const filteredItems = [...items]
     }
     style={{ width: "300px" }}
   />
-</div>
-<div style={{ marginBottom: "20px" }}>
+  <br />
   <strong>Sort:</strong>{" "}
 
   <select
@@ -170,20 +166,22 @@ const filteredItems = [...items]
   </select>
 </div>
 
-      <h1 style={{ marginBottom: "20px" }}>Items</h1>
 
-      <div style={{ display: "grid", gap: "12px" }}>
+
+  
+
+
+
+
+      <div  style={{ display: "grid", gap: "12px" }}>
         {filteredItems.map((item) => (
           <div
             key={item.id}
-            style={{
-              border: "1px solid #000",
-              borderRadius: "4px",
-              padding: "14px",
-              background: "#fff"
-            }}
+
+              className="panel"
+
           >
-            <h2 style={{ margin: "0 0 6px 0", color: "#000" }}>
+            <h2 className="panel-title">
               {item.name}
             </h2>
 

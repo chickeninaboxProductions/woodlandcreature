@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
+import "./Root.css";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -45,16 +46,15 @@ export default function RepPage() {
   function renderRepList(title, dataList) {
     return (
       <div style={{ marginBottom: "24px" }}>
-        <h2
+        <h2 className="panel-title"
           style={{
             marginBottom: "10px",
-            color: "#000"
           }}
         >
           {title}
         </h2>
 
-        <div
+        <div 
           style={{
             display: "grid",
             gap: "8px"
@@ -66,24 +66,21 @@ export default function RepPage() {
             );
 
             return (
-              <div
+              <div className="panel"
                 key={faction.id}
                 style={{
-                  border: "1px solid #000",
-                  borderRadius: "4px",
+
                   padding: "10px",
-                  background: "#fff",
-                  color: "#000",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center"
                 }}
               >
-                <strong style={{ color: "#000" }}>
+                <strong >
                   {faction.Name}
                 </strong>
 
-                <span style={{ color: "#000" }}>
+                <span >
                   {match ? match.Level : 0}
                 </span>
               </div>
@@ -95,11 +92,9 @@ export default function RepPage() {
   }
 
   return (
-    <div
+    <div className="character-sheet"
       style={{
         padding: "24px",
-        fontFamily: "Arial",
-        color: "#000"
       }}
     >
       <Link
@@ -126,11 +121,11 @@ export default function RepPage() {
           color: "#000"
         }}
       >
-        <h1
+        <h1 className="sheet-title"
           style={{
             marginTop: 0,
             marginBottom: "24px",
-            color: "#000"
+
           }}
         >
           Reputation

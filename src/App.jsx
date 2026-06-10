@@ -7,10 +7,11 @@ import {
   Link
 } from "react-router-dom";
 
+import "./Root.css";
 import CharacterPage from "./CharacterPage";
 import RepPage from "./RepPage";
 import ItemList from "./ItemList";
-
+import MoveList from "./MoveList";
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -37,35 +38,23 @@ function CharacterList() {
   }
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        fontFamily: "Arial",
-        color: "#000"
-      }}
-    >
-      <div
-        style={{
-          border: "1px solid #000",
-          background: "#fff",
-          padding: "16px",
-          borderRadius: "4px"
-        }}
-      >
-        <h1 style={{ marginTop: 0 ,color: "#000"}}>Characters</h1>
+    <div className="character-sheet">
+      <div className="panel">
+      
+        <h1 className="sheet-title" style={{ marginBottom: "10px",marginTop: "-10px" }}>Party</h1>
 
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
           {Character.map((Char) => (
             <li key={Char.id} style={{ marginBottom: "8px" }}>
               <Link
                 to={`/character/${Char.id}`}
+                className="panel"
                 style={{
                   display: "block",
                   padding: "8px",
                   border: "1px solid #000",
-                  background: "#fff",
                   color: "#000",
-                  textDecoration: "none"
+                  textDecoration:"none"
                 }}
               >
                 {Char.Name}
@@ -89,6 +78,23 @@ function CharacterList() {
           >
             Item List
           </Link>
+        
+        </div>
+        <div style={{ marginTop: "16px" }}>
+          <Link
+            to="/MoveList"
+            style={{
+              display: "inline-block",
+              padding: "6px 10px",
+              border: "1px solid #000",
+              background: "#fff",
+              color: "#000",
+              textDecoration: "none"
+            }}
+          >
+            Move List
+          </Link>
+        
         </div>
       </div>
     </div>
@@ -101,6 +107,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<CharacterList />} />
         <Route path="/ItemList" element={<ItemList />} />
+        <Route path="/MoveList" element={<MoveList />} />
         <Route path="/character/:id" element={<CharacterPage />} />
         <Route path="/character/:id/reputation" element={<RepPage />} />
       </Routes>
