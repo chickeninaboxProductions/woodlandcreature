@@ -43,53 +43,84 @@ export default function RepPage() {
     setNotoriety(notorietyData || []);
   }
 
-  function renderRepList(title, dataList) {
-    return (
-      <div style={{ marginBottom: "24px" }}>
-        <h2 className="panel-title"
-          style={{
-            marginBottom: "10px",
-          }}
-        >
-          {title}
-        </h2>
+  function renderRepList(title, dataList, setDataList, maxValue) {
+  return (
+    <div style={{ marginBottom: "24px" }}>
+      <h2 className="panel-title" style={{ marginBottom: "10px" }}>
+        {title}
+      </h2>
 
-        <div 
-          style={{
-            display: "grid",
-            gap: "8px"
-          }}
-        >
-          {factions.map((faction) => {
+      <div style={{ display: "grid", gap: "8px" }}>
+        {[...factions]
+          .sort((a, b) => a.id - b.id)
+          .map((faction) => {
             const match = dataList.find(
               (p) => p.Faction === faction.id
             );
 
+            const value = match ? match.Level : 0;
+
+            function updateValue(newValue) {
+              setDataList((prev) => {
+                const existing = prev.find(
+                  (p) => p.Faction === faction.id
+                );
+
+                if (existing) {
+                  return prev.map((p) =>
+                    p.Faction === faction.id
+                      ? { ...p, Level: newValue }
+                      : p
+                  );
+                }
+
+                return [
+                  ...prev,
+                  {
+                    Faction: faction.id,
+                    Level: newValue,
+                    Character: characterId,
+                  },
+                ];
+              });
+            }
+
             return (
-              <div className="panel"
-                key={faction.id}
-                style={{
+              <div
+  className="panel"
+  key={faction.id}
+  style={{
+    padding: "10px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  }}
+>
+  <strong style={{ width: "45%", flexShrink: 0 }}>
+    {faction.Name}
+  </strong>
 
-                  padding: "10px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center"
-                }}
-              >
-                <strong >
-                  {faction.Name}
-                </strong>
+  <input
+    type="range"
+    min="0"
+    max={maxValue}
+    value={value}
+    onChange={(e) => updateValue(Number(e.target.value))}
+    style={{
+      width: "100%",   // <-- key change
+    }}
+  />
 
-                <span >
-                  {match ? match.Level : 0}
-                </span>
-              </div>
+  <span style={{ width: "30px", textAlign: "right", flexShrink: 0 }}>
+    {value}
+  </span>
+</div>
             );
           })}
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="character-sheet"
@@ -101,7 +132,7 @@ export default function RepPage() {
         to={`/character/${characterId}`}
         style={{
           display: "inline-block",
-          marginBottom: "20px",
+          marginBottom: "10px",
           color: "#000",
           textDecoration: "none",
           border: "1px solid #000",
@@ -131,9 +162,9 @@ export default function RepPage() {
           Reputation
         </h1>
 
-        {renderRepList("Prestige", prestige)}
+        {renderRepList("Prestige", prestige, setPrestige, 30)}
 
-        {renderRepList("Notoriety", notoriety)}
+        {renderRepList("Notoriety", notoriety, setNotoriety, 18)}
       </div>
     </div>
   );

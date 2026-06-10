@@ -152,7 +152,7 @@ export default function CharacterPage() {
         to={`/`}
         style={{
           display: "inline-block",
-          marginBottom: "20px",
+          marginBottom: "0px",
           color: "#000",
           textDecoration: "none",
           border: "1px solid #000",
@@ -354,9 +354,11 @@ export default function CharacterPage() {
 
             <div
               className="panel"
-              style={{ marginTop: "20px" }}
+              style={{ marginTop: "20px", color: "#000",
+              textDecoration: "none" }}
             >
-              <Link to="reputation">
+              <Link style={{ marginTop: "20px", color: "#000",
+              textDecoration: "none" }} to="reputation">
                 Reputation
               </Link>
             </div>

@@ -44,23 +44,25 @@ function CharacterList() {
         <h1 className="sheet-title" style={{ marginBottom: "10px",marginTop: "-10px" }}>Party</h1>
 
         <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-          {Character.map((Char) => (
-            <li key={Char.id} style={{ marginBottom: "8px" }}>
-              <Link
-                to={`/character/${Char.id}`}
-                className="panel"
-                style={{
-                  display: "block",
-                  padding: "8px",
-                  border: "1px solid #000",
-                  color: "#000",
-                  textDecoration:"none"
-                }}
-              >
-                {Char.Name}
-              </Link>
-            </li>
-          ))}
+          {[...Character]
+  .sort((a, b) => a.id - b.id)
+  .map((Char) => (
+    <li key={Char.id} style={{ marginBottom: "8px" }}>
+      <Link
+        to={`/character/${Char.id}`}
+        className="panel"
+        style={{
+          display: "block",
+          padding: "8px",
+          border: "1px solid #000",
+          color: "#000",
+          textDecoration: "none",
+        }}
+      >
+        {Char.Name}
+      </Link>
+    </li>
+  ))}
         </ul>
 
         {/* NAV BUTTON */}
