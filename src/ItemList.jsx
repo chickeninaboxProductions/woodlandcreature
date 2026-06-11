@@ -191,16 +191,15 @@ const filteredItems = [...items]
             <p><strong>Range:</strong> {item.Range}</p>
             <p><strong>Load:</strong> {item.Load}</p>
 
-            {/* TAGS */}
-<div style={{ marginTop: "10px" }}>
+            <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
   <strong>Tags:</strong>
 
   <div
     style={{
       display: "flex",
-      flexDirection: "column",
+      flexWrap: "wrap",
       gap: "6px",
-      marginTop: "6px"
+      alignItems: "center"
     }}
   >
     {item.ItemTags?.length ? (
@@ -208,54 +207,29 @@ const filteredItems = [...items]
         const tag = t.Tags;
 
         return (
-          <div
+          <button
             key={i}
+            onClick={() =>
+              setSelectedTag(
+                selectedTag === tag?.Name ? null : tag?.Name
+              )
+            }
+            title={tag?.Description || ""}
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              flexWrap: "wrap"
+              padding: "3px 6px",
+              border: "1px solid #000",
+              fontSize: "12px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              background:
+                selectedTag === tag?.Name
+                  ? "#000"
+                  : getTagStyle(tag?.Positivity).background,
+              color: selectedTag === tag?.Name ? "#fff" : "#000"
             }}
           >
-            {/* TAG NAME */}
-            <button
-            onClick={() =>
-            setSelectedTag(
-                selectedTag === tag?.Name ? null : tag?.Name
-            )
-            }
-            style={{
-                padding: "3px 6px",
-                border: "1px solid #000",
-                borderRadius: "0px",
-                fontSize: "12px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                background:
-                selectedTag === tag?.Name
-                    ? "#000"
-                    : getTagStyle(tag?.Positivity).background,
-                color:
-                selectedTag === tag?.Name
-                    ? "#fff"
-                    : "#000"
-            }}
-            >
             {tag?.Name}
-            </button>
-
-            {/* DESCRIPTION */}
-            {tag?.Description && (
-              <span
-                style={{
-                  fontSize: "13px",
-                  color: "#000"
-                }}
-              >
-                {tag.Description}
-              </span>
-            )}
-          </div>
+          </button>
         );
       })
     ) : (

@@ -43,78 +43,84 @@ export default function RepPage() {
     setNotoriety(notorietyData || []);
   }
 
-  function renderRepList(title, dataList, setDataList, maxValue) {
+  function renderReputation(title, prestigeList, notorietyList) {
+  const PRESTIGE_MAX = 15;
+  const NOTORIETY_MAX = 9;
+
+  function getPrestige(factionId) {
+    return prestigeList.find(p => p.Faction === factionId)?.Level ?? 0;
+  }
+
+  function getNotoriety(factionId) {
+    return notorietyList.find(n => n.Faction === factionId)?.Level ?? 0;
+  }
+
   return (
-    <div style={{ marginBottom: "24px" }}>
-      <h2 className="panel-title" style={{ marginBottom: "10px" }}>
-        {title}
-      </h2>
+    <div style={{ marginBottom: 24 }}>
+      <h2 className="panel-title">{title}</h2>
 
-      <div style={{ display: "grid", gap: "8px" }}>
-        {[...factions]
+      <div style={{ display: "grid", gap: 10 }}>
+        {factions
           .sort((a, b) => a.id - b.id)
-          .map((faction) => {
-            const match = dataList.find(
-              (p) => p.Faction === faction.id
-            );
-
-            const value = match ? match.Level : 0;
-
-            function updateValue(newValue) {
-              setDataList((prev) => {
-                const existing = prev.find(
-                  (p) => p.Faction === faction.id
-                );
-
-                if (existing) {
-                  return prev.map((p) =>
-                    p.Faction === faction.id
-                      ? { ...p, Level: newValue }
-                      : p
-                  );
-                }
-
-                return [
-                  ...prev,
-                  {
-                    Faction: faction.id,
-                    Level: newValue,
-                    Character: characterId,
-                  },
-                ];
-              });
-            }
+          .map(faction => {
+            const prestige = getPrestige(faction.id);
+            const notoriety = getNotoriety(faction.id);
 
             return (
               <div
-  className="panel"
-  key={faction.id}
-  style={{
-    padding: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  }}
->
-  <strong style={{ width: "45%", flexShrink: 0 }}>
-    {faction.Name}
-  </strong>
+                key={faction.id}
+                className="panel"
+                style={{
+                  padding: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12
+                }}
+              >
+                {/* NAME */}
+                <strong style={{ width: 140 }}>
+                  {faction.Name}
+                </strong>
 
-  <input
-    type="range"
-    min="0"
-    max={maxValue}
-    value={value}
-    onChange={(e) => updateValue(Number(e.target.value))}
-    style={{
-      width: "100%",   // <-- key change
-    }}
-  />
+                {/* NOTORIETY (RIGHT → LEFT) */}
+                <div style={{ display: "flex", gap: 2 }}>
+                  {Array.from({ length: NOTORIETY_MAX }).map((_, i) => {
+                    const indexFromRight = NOTORIETY_MAX - 1 - i;
 
-  <span style={{ width: "30px", textAlign: "right", flexShrink: 0 }}>
-    {value}
-  </span>
-</div>
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          width: 14,
+                          height: 14,
+                          border: "1px solid #000",
+                          background:
+                            notoriety > indexFromRight ? "#d33" : "#fff"
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* CENTER LABEL */}
+                <div style={{ width: 90, textAlign: "center" }}>
+                </div>
+
+                {/* PRESTIGE (LEFT → RIGHT, 5|5|5 visual grouping optional) */}
+                <div style={{ display: "flex", gap: 2 }}>
+                  {Array.from({ length: PRESTIGE_MAX }).map((_, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: 14,
+                        height: 14,
+                        border: "1px solid #000",
+                        background: i < prestige ? "#3a3" : "#fff"
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
             );
           })}
       </div>
@@ -162,9 +168,7 @@ export default function RepPage() {
           Reputation
         </h1>
 
-        {renderRepList("Prestige", prestige, setPrestige, 30)}
-
-        {renderRepList("Notoriety", notoriety, setNotoriety, 18)}
+        {renderReputation("", prestige, notoriety)}
       </div>
     </div>
   );

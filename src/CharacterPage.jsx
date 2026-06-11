@@ -15,10 +15,16 @@ export default function CharacterPage() {
   const [character, setCharacter] = useState(null);
   const [equipment, setEquipment] = useState([]);
   const [charmoves, setCharMoves] = useState([]);
-
+  const [drives, setDrives] = useState([]);
+  const [connections, setConnections] = useState([]);
   const [moneyAmount, setMoneyAmount] = useState(1);
   const [subtractMoney, setSubtractMoney] = useState(false);
+  const totalLoad = equipment.reduce((sum, e) => {
+  return sum + (e.Item?.Load || 0);
+}, 0);
 
+const burdened = 4 + (character?.Might || 0);
+const maxLoad = burdened * 2;
   useEffect(() => {
     getCharacter();
   }, []);
@@ -36,12 +42,27 @@ export default function CharacterPage() {
     }
 
     setCharacter(data);
+    const { data: connectionData } = await supabase
+  .from("Connection")
+  .select(`
+    id,
+    Type,
+    Effect,
+    Character2 (
+      id,
+      Name
+    )
+  `)
+  .eq("Character1", id);
+
+setConnections(connectionData || []);
 
     const { data: equipmentData } = await supabase
       .from("Equipement")
       .select(`
         id,
         Notes,
+        Wear,
         Item (
           id,
           name,
@@ -49,6 +70,7 @@ export default function CharacterPage() {
           Load,
           Range,
           Harm,
+          MAX_W,
           DefaultValue
         )
       `)
@@ -70,27 +92,34 @@ export default function CharacterPage() {
       .eq("Character", id);
 
     setCharMoves(charmovesData || []);
+
+    const { data: drivesData } = await supabase
+  .from("Drives")
+  .select(`
+    id,
+    Name,
+    Description
+  `)
+  .eq("Character", id);
+
+setDrives(drivesData || []);
   }
+  
 
-  async function updateStat(statName, value) {
-    const { error } = await supabase
-      .from("Character")
-      .update({
-        [statName]: value
-      })
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setCharacter((prev) => ({
-      ...prev,
+  async function updateStat(statName, value, table, rowId) {
+  const { error } = await supabase
+    .from(table)
+    .update({
       [statName]: value
-    }));
-  }
+    })
+    .eq("id", rowId);
 
+  if (error) {
+    console.error(error);
+    return;   
+  }
+  getCharacter();
+}
   async function changeMoney() {
     const currentMoney = character.Money || 0;
 
@@ -116,7 +145,7 @@ export default function CharacterPage() {
     }));
   }
 
-  function renderTrack(label, current, max, statName) {
+  function renderTrack(label, current, max, statName,table, rowId) {
     return (
       <div style={{ marginBottom: "16px" }}>
         <strong>{label}</strong>
@@ -131,7 +160,9 @@ export default function CharacterPage() {
               onClick={() =>
                 updateStat(
                   statName,
-                  i < current ? i : i + 1
+                  i < current ? i : i + 1,
+                  table,
+                  rowId
                 )
               }
             />
@@ -163,19 +194,103 @@ export default function CharacterPage() {
         ← Back
       </Link>
 
-        <div className="sheet-header">
-          <h1 className="sheet-title">
-            {character.Name}
-          </h1>
+        <div
+  className="sheet-header"
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "20px"
+  }}
+>
+  <div>
+    <h1 className="sheet-title"style={{
+      paddingBottom:"20px"
+  }}>
+      {character.Name}
+    </h1>
 
-          <div className="sheet-subtitle">
-            The {character.Species} {character.Class}
-          </div>
-        </div>
+    <div className="panel-title">
+  The {character.Species} {character.Class}
+</div>
+
+<div
+  style={{
+    marginTop: "8px",
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap"
+  }}
+>
+  {drives.map((drive) => (
+    <span
+      key={drive.id}
+      title={drive.Description}
+      className="panel"
+      style={{
+        padding: "2px 8px",
+
+        cursor: "help",
+        fontSize: "0.9rem"
+      }}
+    >
+      <strong>{drive.Name}</strong>
+    </span>
+  ))}
+  
+</div>
+  </div>
+  
+
+  <div
+    className="panel"
+    style={{
+      maxWidth: "70%",
+      margin: 0
+    }}
+  >
+    <div className="panel-title">
+      Nature
+    </div>
+
+    <strong>{character.Nature}</strong>
+
+    <div style={{ marginTop: "8px" }}>
+      
+      {character.NatureDescription}
+    </div>
+  </div>
+</div>
 
         <div className="sheet-grid">
           {/* LEFT COLUMN */}
           <div>
+            {connections.length > 0 && (
+  <div className="panel">
+    <strong>Connections:</strong>
+
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
+        marginTop: "4px"
+      }}
+    >
+      {connections.map((connection) => (
+        <div
+          key={connection.id}
+          title={connection.Effect || ""}
+          style={{
+            cursor: connection.Effect ? "help" : "default"
+          }}
+        >
+          {connection.Type} with {connection.Character2?.Name}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
             <div className="panel">
               <div className="panel-title">
                 Stats
@@ -217,24 +332,112 @@ export default function CharacterPage() {
                 "Injury",
                 character.Injury,
                 character.MAX_I,
-                "Injury"
+                "Injury",
+                "Character",
+                character.id
               )}
 
               {renderTrack(
                 "Exhaustion",
                 character.Exhaustion,
                 character.MAX_E,
-                "Exhaustion"
+                "Exhaustion",
+                "Character",
+                character.id
               )}
 
               {renderTrack(
                 "Depletion",
                 character.Depletion,
                 character.MAX_D,
-                "Depletion"
+                "Depletion",
+                "Character",
+                character.id
               )}
             </div>
+            <div
+              className="panel">
+                <div className="panel-title">
+                Background
+              </div>
+              </div>
 
+            
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div>
+            
+            <div className="panel">
+  <div
+    className="panel-title"
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: "10px"
+    }}
+  >
+    <span>Equipment</span>
+
+    <span
+      style={{
+        fontSize: "0.85rem",
+        fontWeight: "normal",
+        border: "1px solid #000",
+        padding: "2px 6px"
+      }}
+    >
+      Load: {totalLoad} / {maxLoad}
+      {" "}
+      (Burdened: {burdened})
+    </span>
+  </div>
+
+              {equipment.length === 0 ? (
+                <p>No equipment.</p>
+              ) : (
+                equipment.sort((a, b) => a.id - b.id).map((equip) => (
+                  <div
+                    key={equip.id}
+                    className="equipment-item"
+                  >
+                    <strong>
+                      {equip.Item?.name}
+
+                    </strong>
+                    {renderTrack(
+                "Wear",
+                equip.Wear,
+                equip.Item?.MAX_W,
+                "Wear",
+                "Equipement",
+                equip.id
+              )}
+
+                    <div>
+                      Type: {equip.Item?.Type}
+                    </div>
+
+                    <div>
+                      Load: {equip.Item?.Load}
+                    </div>
+
+                    <div>
+                      Value:
+                      {" "}
+                      {equip.Item?.DefaultValue}
+                    </div>
+
+                    {equip.Notes && (
+                      <div>
+                        Notes: {equip.Notes}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
             <div
               className="panel"
               style={{ marginTop: "20px" }}
@@ -276,50 +479,6 @@ export default function CharacterPage() {
               <button onClick={changeMoney}>
                 Apply
               </button>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div>
-            <div className="panel">
-              <div className="panel-title">
-                Equipment
-              </div>
-
-              {equipment.length === 0 ? (
-                <p>No equipment.</p>
-              ) : (
-                equipment.map((equip) => (
-                  <div
-                    key={equip.id}
-                    className="equipment-item"
-                  >
-                    <strong>
-                      {equip.Item?.name}
-                    </strong>
-
-                    <div>
-                      Type: {equip.Item?.Type}
-                    </div>
-
-                    <div>
-                      Load: {equip.Item?.Load}
-                    </div>
-
-                    <div>
-                      Value:
-                      {" "}
-                      {equip.Item?.DefaultValue}
-                    </div>
-
-                    {equip.Notes && (
-                      <div>
-                        Notes: {equip.Notes}
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
             </div>
 
             <div
