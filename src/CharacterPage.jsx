@@ -16,6 +16,7 @@ export default function CharacterPage() {
   const [equipment, setEquipment] = useState([]);
   const [charmoves, setCharMoves] = useState([]);
   const [drives, setDrives] = useState([]);
+  const [classMoves, setClassMoves] = useState([]);
   const [connections, setConnections] = useState([]);
   const [moneyAmount, setMoneyAmount] = useState(1);
   const [subtractMoney, setSubtractMoney] = useState(false);
@@ -56,7 +57,17 @@ const maxLoad = burdened * 2;
   .eq("Character1", id);
 
 setConnections(connectionData || []);
+const { data: classMovesData } = await supabase
+  .from("ClassMoves")
+  .select(`
+    id,
+    Name,
+    Description,
+    IsChecked
+  `)
+  .eq("Character", id);
 
+setClassMoves(classMovesData || []);
     const { data: equipmentData } = await supabase
       .from("Equipement")
       .select(`
@@ -355,19 +366,100 @@ setDrives(drivesData || []);
                 character.id
               )}
             </div>
+           
+
             <div
-              className="panel">
-                <div className="panel-title">
-                Background
-              </div>
+              className="panel"
+              style={{ marginTop: "20px" }}
+            >
+              <div className="panel-title">
+                Roguish Feats
               </div>
 
-            
+              <div className="moves-list">
+                {charmoves.map((move) => (
+                  <div
+                    key={move.id}
+                    className="move-card"
+                  >
+                    <div>
+                      
+                      {" "}
+                      <strong>
+                        {move.Move?.Name}
+                      </strong>
+                    </div>
+
+                    <div>
+                      {move.Move?.Description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="panel"
+              style={{ marginTop: "20px", color: "#000",
+              textDecoration: "none" }}
+            >
+              <Link style={{ marginTop: "20px", color: "#000",
+              textDecoration: "none" }} to="reputation">
+                Reputation
+              </Link>
+            </div>
           </div>
 
           {/* RIGHT COLUMN */}
           <div>
-            
+            <div
+  className="panel"
+  style={{ marginTop: "20px" }}
+>
+  <div className="panel-title">
+    Class Moves
+  </div>
+
+  {classMoves.length === 0 ? (
+    <p>No class moves.</p>
+  ) : (
+    classMoves.map((move) => (
+      <div
+        key={move.id}
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "8px",
+          marginBottom: "8px"
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={move.IsChecked}
+          onChange={() =>
+            toggleClassMove(
+              move.id,
+              move.IsChecked
+            )
+          }
+        />
+
+        <div>
+          <strong>{move.Name}</strong>
+
+          <div
+            style={{
+              fontSize: "0.9rem",
+              opacity: 0.8
+            }}
+          >
+            {move.Description}
+          </div>
+        </div>
+      </div>
+    ))
+  )}
+</div>
             <div className="panel">
   <div
     className="panel-title"
@@ -481,46 +573,7 @@ setDrives(drivesData || []);
               </button>
             </div>
 
-            <div
-              className="panel"
-              style={{ marginTop: "20px" }}
-            >
-              <div className="panel-title">
-                Roguish Feats
-              </div>
-
-              <div className="moves-list">
-                {charmoves.map((move) => (
-                  <div
-                    key={move.id}
-                    className="move-card"
-                  >
-                    <div>
-                      
-                      {" "}
-                      <strong>
-                        {move.Move?.Name}
-                      </strong>
-                    </div>
-
-                    <div>
-                      {move.Move?.Description}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div
-              className="panel"
-              style={{ marginTop: "20px", color: "#000",
-              textDecoration: "none" }}
-            >
-              <Link style={{ marginTop: "20px", color: "#000",
-              textDecoration: "none" }} to="reputation">
-                Reputation
-              </Link>
-            </div>
+            
           </div>
         </div>
 
