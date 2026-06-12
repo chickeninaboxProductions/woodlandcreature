@@ -525,6 +525,9 @@ setDrives(drivesData || []);
                       Type: {equip.Item?.Type}
                     </div>
                     <div>
+                      Id: {equip.Item?.id}
+                    </div>
+                    <div>
                       Range: {equip.Item?.Range}
                     </div>
 
