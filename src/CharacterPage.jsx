@@ -29,7 +29,7 @@ const maxLoad = burdened * 2;
   useEffect(() => {
     getCharacter();
   }, []);
-
+  
   async function getCharacter() {
     const { data, error } = await supabase
       .from("Character")
@@ -68,26 +68,40 @@ const { data: classMovesData } = await supabase
   .eq("Character", id);
 
 setClassMoves(classMovesData || []);
-    const { data: equipmentData } = await supabase
-      .from("Equipement")
-      .select(`
-        id,
-        Notes,
-        Wear,
-        Item (
-          id,
-          name,
-          Type,
-          Load,
-          Range,
-          Harm,
-          MAX_W,
-          DefaultValue
-        )
-      `)
-      .eq("Character", id);
 
-    setEquipment(equipmentData || []);
+    const { data: equipmentData } = await supabase
+  .from("Equipement")
+  .select(`
+    id,
+    Notes,
+    Wear,
+    Item (
+      id,
+      name,
+      Type,
+      Load,
+      Range,
+      Harm,
+      MAX_W,
+      DefaultValue,
+
+      ItemTags (
+        Tags (
+          Name,
+          Description,
+          Positivity
+        )
+      ),
+
+      WeaponSkill (
+        Moves (
+          Name
+        )
+      )
+    )
+  `)
+  .eq("Character", id);
+  setEquipment(equipmentData || []);
 
     const { data: charmovesData } = await supabase
       .from("CharacterMoves")
@@ -520,12 +534,80 @@ setDrives(drivesData || []);
                       {" "}
                       {equip.Item?.DefaultValue}
                     </div>
+                    {/* TAGS */}
+<div
+  style={{
+    marginTop: "6px",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    flexWrap: "wrap"
+  }}
+>
+  <strong>Tags:</strong>
 
-                    {equip.Notes && (
-                      <div>
-                        Notes: {equip.Notes}
-                      </div>
-                    )}
+  {equip.Item?.ItemTags?.length ? (
+    equip.Item.ItemTags.map((t, i) => (
+      <span
+        key={i}
+        title={t.Tags?.Description || ""}
+        style={{
+          padding: "2px 6px",
+          border: "1px solid #000",
+          fontSize: "12px"
+        }}
+      >
+        {t.Tags?.Name}
+      </span>
+    ))
+  ) : (
+    <span>None</span>
+  )}
+</div>
+
+{/* MOVES */}
+<div style={{ marginTop: "4px" }}>
+  <strong>Moves:</strong>{" "}
+  {equip.Item?.WeaponSkill?.length
+    ? equip.Item.WeaponSkill
+        .map(ws => ws.Moves?.Name)
+        .filter(Boolean)
+        .join(", ")
+    : "None"}
+</div>
+
+                    <div style={{ marginTop: "8px" }}>
+  <strong>Notes:</strong>
+
+  <textarea
+    value={equip.Notes || ""}
+    onChange={(e) => {
+      const newNotes = e.target.value;
+
+      // Update local state immediately
+      setEquipment((prev) =>
+        prev.map((item) =>
+          item.id === equip.id
+            ? { ...item, Notes: newNotes }
+            : item
+        )
+      );
+    }}
+    onBlur={(e) =>
+      updateEquipmentNotes(
+        equip.id,
+        e.target.value
+      )
+    }
+    rows={3}
+    style={{
+      width: "100%",
+      marginTop: "4px",
+      resize: "vertical",
+      boxSizing: "border-box"
+    }}
+  />
+</div>
                   </div>
                 ))
               )}
