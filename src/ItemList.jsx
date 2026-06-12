@@ -185,7 +185,7 @@ const filteredItems = [...items]
               {item.name}
             </h2>
             <div>
-              Id: {Item.id}
+              Id: {item.id}
             </div>
 
             <p><strong>Type:</strong> {item.Type}</p>
