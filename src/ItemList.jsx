@@ -184,6 +184,9 @@ const filteredItems = [...items]
             <h2 className="panel-title">
               {item.name}
             </h2>
+            <div>
+              Id: {Item.id}
+            </div>
 
             <p><strong>Type:</strong> {item.Type}</p>
             <p><strong>Average Cost:</strong> {item.DefaultValue}</p>
