@@ -8,6 +8,61 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
+/**
+ * Generic track renderer
+ * Supports:
+ * - leftToRight (prestige)
+ * - rightToLeft (notoriety mirrored)
+ */
+function ReputationTrack({
+  value,
+  rows,
+  color,
+  direction = "ltr"
+}) {
+  let remaining = value;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {rows.map((rowSize, rowIndex) => {
+        const filled = Math.min(remaining, rowSize);
+        remaining -= filled;
+
+        return (
+          <div
+            key={rowIndex}
+            style={{
+              display: "flex",
+              gap: 2,
+              flexDirection:
+                direction === "rtl" ? "row-reverse" : "row"
+            }}
+          >
+            {Array.from({ length: rowSize }).map((_, i) => {
+              const isFilled =
+                direction === "rtl"
+                  ? i >= rowSize - filled
+                  : i < filled;
+
+              return (
+                <div
+                  key={i}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    border: "1px solid #000",
+                    background: isFilled ? color : "#fff"
+                  }}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function RepPage() {
   const { id: characterId } = useParams();
 
@@ -26,16 +81,8 @@ export default function RepPage() {
       { data: notorietyData }
     ] = await Promise.all([
       supabase.from("Faction").select("*"),
-
-      supabase
-        .from("Prestige")
-        .select("*")
-        .eq("Character", characterId),
-
-      supabase
-        .from("Notoriety")
-        .select("*")
-        .eq("Character", characterId),
+      supabase.from("Prestige").select("*").eq("Character", characterId),
+      supabase.from("Notoriety").select("*").eq("Character", characterId)
     ]);
 
     setFactions(factionsData || []);
@@ -43,97 +90,29 @@ export default function RepPage() {
     setNotoriety(notorietyData || []);
   }
 
-  function renderReputation(title, prestigeList, notorietyList) {
-  const PRESTIGE_MAX = 15;
-  const NOTORIETY_MAX = 9;
-
   function getPrestige(factionId) {
-    return prestigeList.find(p => p.Faction === factionId)?.Level ?? 0;
+    return prestige.find(p => p.Faction === factionId)?.Level ?? 0;
   }
 
   function getNotoriety(factionId) {
-    return notorietyList.find(n => n.Faction === factionId)?.Level ?? 0;
+    return notoriety.find(n => n.Faction === factionId)?.Level ?? 0;
   }
 
-  return (
-    <div style={{ marginBottom: 24 }}>
-      <h2 className="panel-title">{title}</h2>
+  function getReputation(prestigeVal, notorietyVal) {
+  const prestigeTiers = [5, 15, 30];
+  const notorietyTiers = [3, 9, 18];
 
-      <div style={{ display: "grid", gap: 10 }}>
-        {factions
-          .sort((a, b) => a.id - b.id)
-          .map(faction => {
-            const prestige = getPrestige(faction.id);
-            const notoriety = getNotoriety(faction.id);
+  const prestigeScore =
+    prestigeTiers.filter(t => prestigeVal >= t).length;
 
-            return (
-              <div
-                key={faction.id}
-                className="panel"
-                style={{
-                  padding: 10,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12
-                }}
-              >
-                {/* NAME */}
-                <strong style={{ width: 140 }}>
-                  {faction.Name}
-                </strong>
+  const notorietyScore =
+    notorietyTiers.filter(t => notorietyVal >= t).length;
 
-                {/* NOTORIETY (RIGHT → LEFT) */}
-                <div style={{ display: "flex", gap: 2 }}>
-                  {Array.from({ length: NOTORIETY_MAX }).map((_, i) => {
-                    const indexFromRight = NOTORIETY_MAX - 1 - i;
-
-                    return (
-                      <div
-                        key={i}
-                        style={{
-                          width: 14,
-                          height: 14,
-                          border: "1px solid #000",
-                          background:
-                            notoriety > indexFromRight ? "#d33" : "#fff"
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* CENTER LABEL */}
-                <div style={{ width: 90, textAlign: "center" }}>
-                </div>
-
-                {/* PRESTIGE (LEFT → RIGHT, 5|5|5 visual grouping optional) */}
-                <div style={{ display: "flex", gap: 2 }}>
-                  {Array.from({ length: PRESTIGE_MAX }).map((_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        width: 14,
-                        height: 14,
-                        border: "1px solid #000",
-                        background: i < prestige ? "#3a3" : "#fff"
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-      </div>
-    </div>
-  );
+  return prestigeScore - notorietyScore;
 }
 
   return (
-    <div className="character-sheet"
-      style={{
-        padding: "24px",
-      }}
-    >
+    <div className="character-sheet" style={{ padding: "24px" }}>
       <Link
         to={`/character/${characterId}`}
         style={{
@@ -158,17 +137,62 @@ export default function RepPage() {
           color: "#000"
         }}
       >
-        <h1 className="sheet-title"
-          style={{
-            marginTop: 0,
-            marginBottom: "24px",
 
-          }}
-        >
-          Reputation
-        </h1>
+        <div style={{ display: "grid", gap: 16 }}>
+          {factions
+            .sort((a, b) => a.id - b.id)
+            .map(faction => {
+              const p = getPrestige(faction.id);
+              const n = getNotoriety(faction.id);
+              const rep = getReputation(p, n);
 
-        {renderReputation("", prestige, notoriety)}
+              return (
+                <div
+                  key={faction.id}
+                  className="panel"
+                  style={{
+                    padding: 12,
+                    display: "grid",
+                    gridTemplateColumns: "140px 1fr 80px 1fr",
+                    alignItems: "center",
+                    gap: 12
+                  }}
+                >
+                  {/* FACTION */}
+                  <div style={{ fontWeight: "bold" }}>
+                    {faction.Name}
+                  </div>
+
+                  {/* NOTORIETY (RIGHT → LEFT mirrored) */}
+                  <ReputationTrack
+                    value={n}
+                    rows={[3, 6, 9]}
+                    color="#d33"
+                    direction="rtl"
+                  />
+
+                  {/* REPUTATION CENTER */}
+                  <div
+                    style={{
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: 16
+                    }}
+                  >
+                    {rep >= 0 ? `+${rep}` : rep}
+                  </div>
+
+                  {/* PRESTIGE (LEFT → RIGHT) */}
+                  <ReputationTrack
+                    value={p}
+                    rows={[5, 10, 15]}
+                    color="#3a3"
+                    direction="ltr"
+                  />
+                </div>
+              );
+            })}
+        </div>
       </div>
     </div>
   );
