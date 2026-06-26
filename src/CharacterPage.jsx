@@ -11,7 +11,7 @@ const supabase = createClient(
 
 export default function CharacterPage() {
   const { id } = useParams();
-
+  const [otherItems, setOtherItems] = useState("");
   const [character, setCharacter] = useState(null);
   const [equipment, setEquipment] = useState([]);
   const [charmoves, setCharMoves] = useState([]);
@@ -29,7 +29,25 @@ const maxLoad = burdened * 2;
   useEffect(() => {
     getCharacter();
   }, []);
-  
+  async function updateOtherItems(value) {
+  const { error } = await supabase
+    .from("Character")
+    .update({
+      OtherItems: value
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setCharacter((prev) => ({
+    ...prev,
+    OtherItems: value
+  }));
+}
+
   async function getCharacter() {
     const { data, error } = await supabase
       .from("Character")
@@ -43,6 +61,7 @@ const maxLoad = burdened * 2;
     }
 
     setCharacter(data);
+    setOtherItems(data.OtherItems || "");
     const { data: connectionData } = await supabase
   .from("Connection")
   .select(`
@@ -484,6 +503,7 @@ setDrives(drivesData || []);
       gap: "10px"
     }}
   >
+    
     <span>Equipment</span>
 
     <span
@@ -613,10 +633,32 @@ setDrives(drivesData || []);
     }}
   />
 </div>
+
                   </div>
                 ))
               )}
             </div>
+            <div
+  className="panel"
+  style={{ marginTop: "20px" }}
+>
+  <div className="panel-title">
+    Other Items
+  </div>
+
+  <textarea
+    value={otherItems}
+    onChange={(e) => setOtherItems(e.target.value)}
+    onBlur={(e) => updateOtherItems(e.target.value)}
+    rows={8}
+    placeholder="Other things you have"
+    style={{
+      width: "100%",
+      boxSizing: "border-box",
+      resize: "vertical"
+    }}
+  />
+</div>
             <div
               className="panel"
               style={{ marginTop: "20px" }}

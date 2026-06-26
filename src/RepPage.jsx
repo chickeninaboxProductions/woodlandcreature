@@ -8,12 +8,6 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 );
 
-/**
- * Generic track renderer
- * Supports:
- * - leftToRight (prestige)
- * - rightToLeft (notoriety mirrored)
- */
 function ReputationTrack({
   value,
   rows,
@@ -73,7 +67,33 @@ export default function RepPage() {
   useEffect(() => {
     loadData();
   }, [characterId]);
+async function changeTrack(type, factionId, delta) {
+  const list = type === "prestige" ? prestige : notoriety;
+  const setter = type === "prestige" ? setPrestige : setNotoriety;
 
+  const row = list.find(r => r.Faction === factionId);
+
+  if (!row) return;
+
+  const max = type === "prestige" ? 30 : 18;
+  const newLevel = Math.max(0, Math.min(max, row.Level + delta));
+
+  const { error } = await supabase
+    .from(type === "prestige" ? "Prestige" : "Notoriety")
+    .update({ Level: newLevel })
+    .eq("id", row.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setter(list.map(r =>
+    r.id === row.id
+      ? { ...r, Level: newLevel }
+      : r
+  ));
+}
   async function loadData() {
     const [
       { data: factionsData },
@@ -139,60 +159,113 @@ export default function RepPage() {
       >
 
         <div style={{ display: "grid", gap: 16 }}>
-          {factions
-            .sort((a, b) => a.id - b.id)
-            .map(faction => {
-              const p = getPrestige(faction.id);
-              const n = getNotoriety(faction.id);
-              const rep = getReputation(p, n);
 
-              return (
-                <div
-                  key={faction.id}
-                  className="panel"
-                  style={{
-                    padding: 12,
-                    display: "grid",
-                    gridTemplateColumns: "140px 1fr 80px 1fr",
-                    alignItems: "center",
-                    gap: 12
-                  }}
-                >
-                  {/* FACTION */}
-                  <div style={{ fontWeight: "bold" }}>
-                    {faction.Name}
-                  </div>
+  {/* HEADER */}
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "140px 1fr 80px 1fr",
+      gap: 12,
+      fontWeight: "bold",
+      textAlign: "center",
+      padding: "0 12px"
+    }}
+  >
+    <div style={{ textAlign: "left" }}>Faction</div>
+    <div>Notoriety</div>
+    <div></div>
+    <div>Prestige</div>
+  </div>
 
-                  {/* NOTORIETY (RIGHT → LEFT mirrored) */}
-                  <ReputationTrack
-                    value={n}
-                    rows={[3, 6, 9]}
-                    color="#d33"
-                    direction="rtl"
-                  />
+  {factions
+    .sort((a, b) => a.id - b.id)
+    .map(faction => {
+      const p = getPrestige(faction.id);
+      const n = getNotoriety(faction.id);
+      const rep = getReputation(p, n);
 
-                  {/* REPUTATION CENTER */}
-                  <div
-                    style={{
-                      textAlign: "center",
-                      fontWeight: "bold",
-                      fontSize: 16
-                    }}
-                  >
-                    {rep >= 0 ? `+${rep}` : rep}
-                  </div>
+      return (
+        <div
+          key={faction.id}
+          className="panel"
+          style={{
+            padding: 12,
+            display: "grid",
+            gridTemplateColumns: "140px 1fr 80px 1fr",
+            alignItems: "center",
+            gap: 12
+          }}
+        >
+          {/* FACTION */}
+          <div style={{ fontWeight: "bold" }}>
+            {faction.Name}
+          </div>
 
-                  {/* PRESTIGE (LEFT → RIGHT) */}
-                  <ReputationTrack
-                    value={p}
-                    rows={[5, 10, 15]}
-                    color="#3a3"
-                    direction="ltr"
-                  />
-                </div>
-              );
-            })}
+          {/* NOTORIETY */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8
+            }}
+          >
+            <button onClick={() => changeTrack("notoriety", faction.id, -1)}>
+              -
+            </button>
+
+            <ReputationTrack
+              value={n}
+              rows={[3, 6, 9]}
+              color="#d33"
+              direction="rtl"
+            />
+
+            <button onClick={() => changeTrack("notoriety", faction.id, 1)}>
+              +
+            </button>
+          </div>
+
+          {/* REPUTATION */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              fontWeight: "bold",
+              fontSize: 24
+            }}
+          >
+            {rep >= 0 ? `+${rep}` : rep}
+          </div>
+
+          {/* PRESTIGE */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8
+            }}
+          >
+            <button onClick={() => changeTrack("prestige", faction.id, -1)}>
+              -
+            </button>
+
+            <ReputationTrack
+              value={p}
+              rows={[5, 10, 15]}
+              color="#3a3"
+              direction="ltr"
+            />
+
+            <button onClick={() => changeTrack("prestige", faction.id, 1)}>
+              +
+            </button>
+          </div>
         </div>
+      );
+    })}
+</div>
       </div>
     </div>
   );

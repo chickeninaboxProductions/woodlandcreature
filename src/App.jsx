@@ -12,6 +12,7 @@ import CharacterPage from "./CharacterPage";
 import RepPage from "./RepPage";
 import ItemList from "./ItemList";
 import MoveList from "./MoveList";
+import Notes from "./Notes";
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -98,6 +99,21 @@ function CharacterList() {
           </Link>
         
         </div>
+        <div style={{ marginTop: "16px" }}>
+  <Link
+    to="/Notes"
+    style={{
+      display: "inline-block",
+      padding: "6px 10px",
+      border: "1px solid #000",
+      background: "#fff",
+      color: "#000",
+      textDecoration: "none"
+    }}
+  >
+    Notes
+  </Link>
+</div>
       </div>
     </div>
   );
@@ -110,6 +126,7 @@ export default function App() {
         <Route path="/" element={<CharacterList />} />
         <Route path="/ItemList" element={<ItemList />} />
         <Route path="/MoveList" element={<MoveList />} />
+        <Route path="/Notes" element={<Notes />} />
         <Route path="/character/:id" element={<CharacterPage />} />
         <Route path="/character/:id/reputation" element={<RepPage />} />
       </Routes>
