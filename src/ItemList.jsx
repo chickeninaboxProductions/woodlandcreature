@@ -189,7 +189,7 @@ const filteredItems = [...items]
             </div>
 
             <p><strong>Type:</strong> {item.Type}</p>
-            <p><strong>Average Cost:</strong> {item.DefaultValue}</p>
+            <p><strong>Average Cost:</strong> {item.DefaultValue} Doubloons</p>
             <p><strong>Wear:</strong> {item.MAX_W}</p>
             <p><strong>Range:</strong> {item.Range}</p>
             <p><strong>Load:</strong> {item.Load}</p>

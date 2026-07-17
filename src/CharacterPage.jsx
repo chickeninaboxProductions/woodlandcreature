@@ -555,7 +555,7 @@ setDrives(drivesData || []);
                     
 
                     <div>
-                      Value:
+                      Doubloons:
                       {" "}
                       {equip.Item?.DefaultValue}
                     </div>
