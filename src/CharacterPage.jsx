@@ -664,7 +664,7 @@ setDrives(drivesData || []);
               style={{ marginTop: "20px" }}
             >
               <div className="panel-title">
-                Value
+                Doubloons
               </div>
 
               <h2 className="panel-title">
