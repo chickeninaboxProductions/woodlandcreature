@@ -214,7 +214,28 @@ setDrives(drivesData || []);
       Nubs: newNubs
     }));
   }
+async function updateEquipmentNotes(equipId, value) {
+  const { error } = await supabase
+    .from("Equipement")
+    .update({
+      Notes: value
+    })
+    .eq("id", equipId);
 
+  if (error) {
+    console.error("Error updating item notes:", error);
+    return;
+  }
+
+  // Keep local state in sync
+  setEquipment((prev) =>
+    prev.map((item) =>
+      item.id === equipId
+        ? { ...item, Notes: value }
+        : item
+    )
+  );
+}
   function renderTrack(label, current, max, statName,table, rowId) {
     return (
       <div style={{ marginBottom: "16px" }}>
