@@ -19,7 +19,9 @@ export default function CharacterPage() {
   const [classMoves, setClassMoves] = useState([]);
   const [connections, setConnections] = useState([]);
   const [moneyAmount, setMoneyAmount] = useState(1);
+  const [nubsAmount, setNubsAmount] = useState(1);
   const [subtractMoney, setSubtractMoney] = useState(false);
+  const [subtractNubs, setSubtractNubs] = useState(false);
   const totalLoad = equipment.reduce((sum, e) => {
   return sum + (e.Item?.Load || 0);
 }, 0);
@@ -186,6 +188,30 @@ setDrives(drivesData || []);
     setCharacter((prev) => ({
       ...prev,
       Money: newMoney
+    }));
+  }
+  async function changeNubs() {
+    const currentNubs = character.Nubs || 0;
+
+    const newNubs = subtractNubs
+      ? Math.max(0, currentNubs - nubsAmount)
+      : currentNubs + nubsAmount;
+
+    const { error } = await supabase
+      .from("Character")
+      .update({
+        Nubs: newNubs
+      })
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setCharacter((prev) => ({
+      ...prev,
+      Nubs: newNubs
     }));
   }
 
@@ -660,47 +686,86 @@ setDrives(drivesData || []);
   />
 </div>
             <div
-              className="panel"
-              style={{ marginTop: "20px" }}
-            >
-              <div className="panel-title">
-                Doubloons
-              </div>
+  style={{
+    display: "flex",
+    gap: "20px",
+    marginTop: "20px",
+  }}
+>
+  <div className="panel" style={{ flex: 1 }}>
+    <div className="panel-title">
+      Doubloons
+    </div>
 
-              <h2 className="panel-title">
-                {character.Money || 0}
-              </h2>
+    <h2 className="panel-title">
+      {character.Money || 0}
+    </h2>
 
-              <input
-                type="number"
-                
-                value={moneyAmount}
-                onChange={(e) =>
-                  setMoneyAmount(
-                    Number(e.target.value) || 1
-                  )
-                }
-              />
+    <input
+      type="number"
+      value={moneyAmount}
+      onChange={(e) =>
+        setMoneyAmount(
+          Number(e.target.value) || 1
+        )
+      }
+    />
 
-              <div>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={subtractMoney}
-                    onChange={(e) =>
-                      setSubtractMoney(
-                        e.target.checked
-                      )
-                    }
-                  />
-                  Subtract
-                </label>
-              </div>
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={subtractMoney}
+          onChange={(e) =>
+            setSubtractMoney(e.target.checked)
+          }
+        />
+        Subtract
+      </label>
+    </div>
 
-              <button onClick={changeMoney}>
-                Apply
-              </button>
-            </div>
+    <button onClick={changeMoney}>
+      Apply
+    </button>
+  </div>
+
+  <div className="panel" style={{ flex: 1 }}>
+    <div className="panel-title">
+      Nubs
+    </div>
+
+    <h2 className="panel-title">
+      {character.Nubs || 0}
+    </h2>
+
+    <input
+      type="number"
+      value={nubsAmount}
+      onChange={(e) =>
+        setNubsAmount(
+          Number(e.target.value) || 1
+        )
+      }
+    />
+
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={subtractNubs}
+          onChange={(e) =>
+            setSubtractNubs(e.target.checked)
+          }
+        />
+        Subtract
+      </label>
+    </div>
+
+    <button onClick={changeNubs}>
+      Apply
+    </button>
+  </div>
+</div>
 
             
           </div>
