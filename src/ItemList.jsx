@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import "./Root.css";
+import { Link } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -111,6 +112,20 @@ const filteredItems = [...items]
   });
   return (
     <div className="character-sheet">
+      <Link
+        to={`/`}
+        style={{
+          display: "inline-block",
+          marginBottom: "0px",
+          color: "#000",
+          textDecoration: "none",
+          border: "1px solid #000",
+          padding: "4px 8px",
+          background: "#fff"
+        }}
+      >
+        ← Back
+      </Link>
             <h1 className="sheet-title" style={{ marginBottom: "10px",marginTop: "-10px" }}>Items</h1>
       <div className="panel">
         

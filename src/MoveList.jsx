@@ -8,7 +8,20 @@ export default function MoveList() {
         fontFamily: "Arial",
         color: "#000"
       }}
-    >
+    ><Link
+        to={`/`}
+        style={{
+          display: "inline-block",
+          marginBottom: "0px",
+          color: "#000",
+          textDecoration: "none",
+          border: "1px solid #000",
+          padding: "4px 8px",
+          background: "#fff"
+        }}
+      >
+        ← Back
+      </Link>
       
 
 
